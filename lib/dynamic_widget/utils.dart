@@ -1,10 +1,11 @@
-import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:collection/collection.dart';
 import 'package:dynamic_widget/dynamic_widget.dart';
 import 'package:dynamic_widget/dynamic_widget/drop_cap_text.dart';
 import 'package:poc_generic_ui/utils.dart';
 import 'package:flutter/widgets.dart';
+import 'package:poc_generic_ui/widgets/dynamic_linear_gradient.dart';
 
 TextAlign parseTextAlign(String? textAlignString) {
   //left the system decide
@@ -1389,4 +1390,48 @@ Map<String, dynamic>? exportBoxBorder(BoxBorder? border) {
   }
 
   return null;
+}
+
+// TODO: Border unsupported type BorderDirectional
+Shader parseShader(Map<String, dynamic> map, Rect rect) {
+  if (map['type'] == 'DynamicLinearGradient') {
+    final colors = (map['colors'] as List)
+        .map((color) => parseHexColor(color))
+        .whereNotNull()
+        .toList();
+
+    return DynamicLinearGradient(
+      rect: rect,
+      colors: colors,
+      begin: parseAlignment(map['begin']) ?? Alignment.centerLeft,
+      end: parseAlignment(map['end']) ?? Alignment.centerRight,
+      colorStops: map['colorStops'],
+      tileMode:
+          TileModeExtension.parseTileMode(map['tileMode']) ?? TileMode.clamp,
+      matrix4: map['matrix4'],
+    );
+  }
+
+  throw UnsupportedError('Unsupported shader type: ${map['type']}');
+}
+
+Map<String, dynamic> exportShader(Shader shader) {
+  if (shader is DynamicLinearGradient) {
+    final colors =
+        shader.colors.map((color) => color.value.toRadixString(16)).toList();
+
+    return <String, dynamic>{
+      'type': 'DynamicLinearGradient',
+      'colors': colors,
+      'begin': exportAlignment(shader.begin),
+      'end': exportAlignment(shader.end),
+      'colorStops': shader.colorStops,
+      'tileMode': shader.tileMode.name,
+      'matrix4': shader.matrix4,
+    };
+  }
+
+  throw UnsupportedError(
+    'Unsupported shader type: ${shader.runtimeType.toString()}',
+  );
 }
