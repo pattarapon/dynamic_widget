@@ -829,6 +829,15 @@ Axis parseAxis(String? axisString) {
   return Axis.horizontal;
 }
 
+String exportAxis(Axis? axis) {
+  if (axis == Axis.horizontal) {
+    return "horizontal";
+  } else if (axis == Axis.vertical) {
+    return "vertical";
+  }
+  return "horizontal";
+}
+
 //WrapAlignment
 WrapAlignment parseWrapAlignment(String? wrapAlignmentString) {
   if (wrapAlignmentString == null) {
