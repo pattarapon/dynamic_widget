@@ -245,6 +245,7 @@ TextStyle? parseTextStyle(Map<String, dynamic>? map) {
   String? fontWeight = map['fontWeight'];
   FontStyle fontStyle =
       'italic' == map['fontStyle'] ? FontStyle.italic : FontStyle.normal;
+  List? shadows = map['shadows'];
 
   return TextStyle(
     color: parseHexColor(color),
@@ -254,6 +255,8 @@ TextStyle? parseTextStyle(Map<String, dynamic>? map) {
     fontFamily: fontFamily,
     fontStyle: fontStyle,
     fontWeight: parseFontWeight(fontWeight),
+    shadows:
+        shadows?.map((shadow) => parseShadow(shadow)).whereNotNull().toList(),
   );
 }
 
@@ -261,6 +264,9 @@ Map<String, dynamic>? exportTextStyle(TextStyle? textStyle) {
   if (textStyle == null) {
     return null;
   }
+
+  final shadows =
+      textStyle.shadows?.map((shadow) => exportShadow(shadow)).toList();
 
   return <String, dynamic>{
     "color": textStyle.color != null
@@ -272,6 +278,7 @@ Map<String, dynamic>? exportTextStyle(TextStyle? textStyle) {
     "fontFamily": textStyle.fontFamily,
     "fontStyle": FontStyle.italic == textStyle.fontStyle ? "italic" : "normal",
     "fontWeight": exportFontWeight(textStyle.fontWeight),
+    "shadows": shadows,
   };
 }
 
@@ -1443,4 +1450,24 @@ Map<String, dynamic> exportShader(Shader shader) {
   throw UnsupportedError(
     'Unsupported shader type: ${shader.runtimeType.toString()}',
   );
+}
+
+Shadow? parseShadow(Map<String, dynamic>? map) {
+  if (map == null) return null;
+
+  return Shadow(
+    color: parseHexColor(map['color']) ?? Color(0xFF000000),
+    offset: parseOffset(map['offset']) ?? Offset.zero,
+    blurRadius: map['blurRadius'] ?? 0.0,
+  );
+}
+
+Map<String, dynamic>? exportShadow(Shadow? shadow) {
+  if (shadow == null) return null;
+
+  return <String, dynamic>{
+    'color': shadow.color.value.toRadixString(16),
+    'offset': '${shadow.offset.dx}:${shadow.offset.dy}',
+    'blurRadius': shadow.blurRadius,
+  };
 }
